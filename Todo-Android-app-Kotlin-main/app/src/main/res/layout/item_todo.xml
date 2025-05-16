@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="12dp"
+    android:id="@+id/itemlayout"
+    android:layout_height="wrap_content"
+    android:backgroundTint="@color/white"
+    android:clickable="true"
+    app:cardElevation="5dp"
+    android:layout_margin="10dp"
+    android:focusable="true"
+    android:checkable="true">
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp">
+        
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/checkboxDone"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="21sp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:id="@+id/textviewTitle"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:id="@+id/buttonDelete"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/baseline_delete"
+            />
+    </LinearLayout>
+
+
+
+
+
+        
+    
+    
+    
+    
+</com.google.android.material.card.MaterialCardView>
