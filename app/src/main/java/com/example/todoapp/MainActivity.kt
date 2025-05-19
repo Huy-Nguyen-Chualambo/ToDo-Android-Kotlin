@@ -3,14 +3,14 @@ package com.example.todoapp
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.todoapp.data.Todo
+import com.example.todoapp.data.TodoFilter
 import com.example.todoapp.databinding.ActivityMainBinding
 import com.example.todoapp.databinding.DialogTaskBinding
 import com.example.todoapp.ui.TodoAdapter
