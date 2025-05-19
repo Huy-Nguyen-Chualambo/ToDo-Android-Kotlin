@@ -1,54 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="12dp"
-    android:id="@+id/itemlayout"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:backgroundTint="@color/white"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="4dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/pastel_blue_light"
     android:clickable="true"
-    app:cardElevation="5dp"
-    android:layout_margin="10dp"
-    android:focusable="true"
-    android:checkable="true">
+    android:focusable="true">
     
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="12dp">
+        android:orientation="vertical"
+        android:padding="16dp">
         
-        <CheckBox
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/checkboxDone"/>
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <CheckBox
+                android:id="@+id/checkboxDone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:buttonTint="@color/pastel_blue"/>
+
+            <TextView
+                android:id="@+id/textviewTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:textSize="18sp"
+                android:textColor="@color/black"/>
+
+            <ImageView
+                android:id="@+id/buttonDelete"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:padding="4dp"
+                android:src="@drawable/baseline_delete"
+                android:tint="@color/gray"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
+        </LinearLayout>
 
         <TextView
-            android:layout_width="0dp"
+            android:id="@+id/textviewDescription"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="21sp"
-            android:layout_marginStart="8dp"
-            android:layout_weight="1"
-            android:id="@+id/textviewTitle"/>
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            android:textColor="@color/gray"
+            android:maxLines="2"
+            android:ellipsize="end"/>
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:id="@+id/buttonDelete"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/baseline_delete"
-            />
     </LinearLayout>
 
-
-
-
-
-        
-    
-    
-    
-    
 </com.google.android.material.card.MaterialCardView>

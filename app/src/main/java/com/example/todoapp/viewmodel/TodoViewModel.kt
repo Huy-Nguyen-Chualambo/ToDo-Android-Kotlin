@@ -16,8 +16,8 @@ class TodoViewModel(application: Application):AndroidViewModel(application) {
 
     val todos: LiveData<List<Todo>> = dao.getAllTodo()
 
-    fun insertTodo(title: String) = viewModelScope.launch {
-        dao.insert(Todo(title = title))
+    fun insertTodo(title: String, description: String = "") = viewModelScope.launch {
+        dao.insert(Todo(title = title, description = description))
     }
     fun toggleDone(todo: Todo) = viewModelScope.launch {
         dao.update(todo.copy(isDone = !todo.isDone))
