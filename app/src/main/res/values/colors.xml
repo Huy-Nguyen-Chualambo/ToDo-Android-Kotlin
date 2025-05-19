@@ -31,4 +31,13 @@
 
     <color name="seed">#4F6D9A</color>
     <color name="error">#BA1A1A</color>
+
+    <color name="primary">#4F6D9A</color>
+    <color name="primary_dark">#3D5A7A</color>
+    <color name="primary_light">#7B9BC8</color>
+    <color name="accent">#FF4081</color>
+    <color name="warning">#FFA000</color>
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="divider">#BDBDBD</color>
 </resources>

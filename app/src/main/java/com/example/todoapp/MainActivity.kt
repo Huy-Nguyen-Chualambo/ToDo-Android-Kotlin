@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: TodoAdapter
     private var selectedDateTime: LocalDateTime? = null
     private val dateFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm", Locale.getDefault())
+    private var currentDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,6 +99,7 @@ class MainActivity : AppCompatActivity() {
     private fun showAddTaskDialog() {
         val dialogBinding = DialogTaskBinding.inflate(layoutInflater)
         selectedDateTime = null
+        dialogBinding.textDeadline.text = "No deadline"
 
         val dialog = AlertDialog.Builder(this)
             .setTitle("Add New Task")
@@ -115,13 +117,8 @@ class MainActivity : AppCompatActivity() {
             .setNegativeButton("Cancel", null)
             .create()
 
-        dialogBinding.buttonSetDeadline.setOnClickListener {
-            showDateTimePicker { dateTime ->
-                selectedDateTime = dateTime
-                dialogBinding.textDeadline.text = dateTime.format(dateFormatter)
-            }
-        }
-
+        setupDeadlineButton(dialogBinding, dialog)
+        currentDialog = dialog
         dialog.show()
     }
 
@@ -155,14 +152,22 @@ class MainActivity : AppCompatActivity() {
             .setNegativeButton("Cancel", null)
             .create()
 
+        setupDeadlineButton(dialogBinding, dialog)
+        currentDialog = dialog
+        dialog.show()
+    }
+
+    private fun setupDeadlineButton(dialogBinding: DialogTaskBinding, dialog: AlertDialog) {
         dialogBinding.buttonSetDeadline.setOnClickListener {
             showDateTimePicker { dateTime ->
-                selectedDateTime = dateTime
-                dialogBinding.textDeadline.text = dateTime.format(dateFormatter)
+                try {
+                    selectedDateTime = dateTime
+                    dialogBinding.textDeadline.text = dateTime.format(dateFormatter)
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Error setting deadline: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
             }
         }
-
-        dialog.show()
     }
 
     private fun showDateTimePicker(onDateTimeSelected: (LocalDateTime) -> Unit) {
@@ -174,8 +179,12 @@ class MainActivity : AppCompatActivity() {
                 TimePickerDialog(
                     this,
                     { _, hour, minute ->
-                        val dateTime = LocalDateTime.of(year, month + 1, day, hour, minute)
-                        onDateTimeSelected(dateTime)
+                        try {
+                            val dateTime = LocalDateTime.of(year, month + 1, day, hour, minute)
+                            onDateTimeSelected(dateTime)
+                        } catch (e: Exception) {
+                            Toast.makeText(this, "Invalid date/time: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
                     },
                     calendar.get(Calendar.HOUR_OF_DAY),
                     calendar.get(Calendar.MINUTE),
@@ -190,5 +199,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun showSnackbar(message: String) {
         Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        currentDialog?.dismiss()
     }
 }

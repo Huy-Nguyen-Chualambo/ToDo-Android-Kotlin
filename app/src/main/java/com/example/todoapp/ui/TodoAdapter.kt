@@ -11,7 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.R
 import com.example.todoapp.data.Todo
 import com.example.todoapp.databinding.ItemTodoBinding
-import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class TodoAdapter(
@@ -20,7 +21,7 @@ class TodoAdapter(
     private val onItemClick: (Todo) -> Unit
 ): ListAdapter<Todo, TodoAdapter.TodoViewHolder>(DiffCallBack()) {
 
-    private val dateFormat = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
+    private val dateFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm", Locale.getDefault())
 
     class TodoViewHolder(val binding: ItemTodoBinding): RecyclerView.ViewHolder(binding.root)
 
@@ -31,23 +32,53 @@ class TodoAdapter(
 
     override fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
         val todo = getItem(position)
-        with(holder.binding) {
-            textviewTitle.text = todo.title
-            textviewDescription.text = todo.description
-            textviewDescription.visibility = if (todo.description.isBlank()) View.GONE else View.VISIBLE
-            
-            textviewDeadline.text = todo.deadline?.let { dateFormat.format(it) }
-            textviewDeadline.visibility = if (todo.deadline == null) View.GONE else View.VISIBLE
-            
+        holder.binding.apply {
             checkboxDone.isChecked = todo.isDone
-            textviewTitle.paintFlags = if (todo.isDone)
-                textviewTitle.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-            else
-                textviewTitle.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+            textTitle.text = todo.title
+            textTitle.paintFlags = if (todo.isDone) {
+                textTitle.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+            } else {
+                textTitle.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+            }
 
-            checkboxDone.setOnCheckedChangeListener { _, _ -> onToggleDone(todo) }
-            buttonDelete.setOnClickListener { onDelete(todo) }
-            root.setOnClickListener { onItemClick(todo) }
+            // Handle description visibility
+            if (todo.description.isNotBlank()) {
+                textDescription.visibility = View.VISIBLE
+                textDescription.text = todo.description
+            } else {
+                textDescription.visibility = View.GONE
+            }
+
+            // Handle deadline visibility and formatting
+            if (todo.deadline != null) {
+                textDeadline.visibility = View.VISIBLE
+                textDeadline.text = todo.deadline.format(dateFormatter)
+                
+                // Highlight deadline if it's approaching or overdue
+                val now = LocalDateTime.now()
+                if (todo.deadline.isBefore(now)) {
+                    textDeadline.setTextColor(root.context.getColor(R.color.error))
+                } else if (todo.deadline.isBefore(now.plusDays(1))) {
+                    textDeadline.setTextColor(root.context.getColor(R.color.warning))
+                } else {
+                    textDeadline.setTextColor(root.context.getColor(R.color.text_secondary))
+                }
+            } else {
+                textDeadline.visibility = View.GONE
+            }
+
+            // Set up click listeners
+            checkboxDone.setOnClickListener {
+                onToggleDone(todo)
+            }
+
+            buttonDelete.setOnClickListener {
+                onDelete(todo)
+            }
+
+            root.setOnClickListener {
+                onItemClick(todo)
+            }
 
             // Add animation
             root.startAnimation(AnimationUtils.loadAnimation(root.context, R.anim.item_animation))
