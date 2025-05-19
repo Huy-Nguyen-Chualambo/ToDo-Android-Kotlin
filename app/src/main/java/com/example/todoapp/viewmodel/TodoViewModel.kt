@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.todoapp.data.Todo
 import com.example.todoapp.data.TodoDatabase
 import com.example.todoapp.data.TodoFilter
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -21,7 +22,7 @@ class TodoViewModel(application: Application): AndroidViewModel(application) {
     private val _currentFilter = MutableStateFlow(TodoFilter.ALL)
     private val _sortOrder = MutableStateFlow(SortOrder.CREATED_AT)
 
-    private val allTodos = dao.getAllTodo()
+    private val allTodos: Flow<List<Todo>> = dao.getAllTodo()
 
     val todos: LiveData<List<Todo>> = combine(
         allTodos,
@@ -31,7 +32,7 @@ class TodoViewModel(application: Application): AndroidViewModel(application) {
     ) { todos, query, filter, sortOrder ->
         todos.filter { todo ->
             val matchesSearch = todo.title.contains(query, ignoreCase = true) ||
-                    todo.description.contains(query, ignoreCase = true)
+                    (todo.description?.contains(query, ignoreCase = true) ?: false)
             val matchesFilter = when (filter) {
                 TodoFilter.ALL -> true
                 TodoFilter.ACTIVE -> !todo.isDone
