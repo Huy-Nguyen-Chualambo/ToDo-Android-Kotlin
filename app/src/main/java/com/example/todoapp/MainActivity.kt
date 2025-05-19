@@ -16,16 +16,17 @@ import com.example.todoapp.databinding.DialogTaskBinding
 import com.example.todoapp.ui.TodoAdapter
 import com.example.todoapp.viewmodel.TodoViewModel
 import com.google.android.material.snackbar.Snackbar
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
-import java.util.Date
-import java.text.SimpleDateFormat
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: TodoViewModel
     private lateinit var adapter: TodoAdapter
-    private var selectedDate: Date? = null
+    private var selectedDateTime: LocalDateTime? = null
+    private val dateFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm", Locale.getDefault())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,25 +57,28 @@ class MainActivity : AppCompatActivity() {
             }
         )
 
-        binding.rvTodos.adapter = adapter
-        binding.rvTodos.layoutManager = LinearLayoutManager(this)
+        binding.rvTodos.apply {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            adapter = this@MainActivity.adapter
+        }
     }
 
     private fun setupSearch() {
         binding.searchEditText.setOnEditorActionListener { _, _, _ ->
-            val query = binding.searchEditText.text.toString()
-            viewModel.searchTodos(query)
-            true
+            viewModel.searchTodos(binding.searchEditText.text.toString())
+            false
         }
     }
 
     private fun setupFilterChips() {
         binding.filterChipGroup.setOnCheckedChangeListener { group, checkedId ->
-            when (checkedId) {
-                R.id.chipAll -> viewModel.filterTodos(TodoFilter.ALL)
-                R.id.chipActive -> viewModel.filterTodos(TodoFilter.ACTIVE)
-                R.id.chipCompleted -> viewModel.filterTodos(TodoFilter.COMPLETED)
+            val filter = when (checkedId) {
+                binding.chipAll.id -> TodoFilter.ALL
+                binding.chipActive.id -> TodoFilter.ACTIVE
+                binding.chipCompleted.id -> TodoFilter.COMPLETED
+                else -> TodoFilter.ALL
             }
+            viewModel.filterTodos(filter)
         }
     }
 
@@ -92,62 +96,76 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showAddTaskDialog() {
-        showTaskDialog(null)
-    }
+        val dialogBinding = DialogTaskBinding.inflate(layoutInflater)
+        selectedDateTime = null
 
-    private fun showEditTaskDialog(todo: Todo) {
-        showTaskDialog(todo)
-    }
-
-    private fun showTaskDialog(todo: Todo?) {
-        val dialogBinding = DialogTaskBinding.inflate(LayoutInflater.from(this))
-        selectedDate = todo?.deadline
-
-        // Pre-fill data if editing
-        todo?.let {
-            dialogBinding.editTextTitle.setText(it.title)
-            dialogBinding.editTextDescription.setText(it.description)
-            dialogBinding.editTextDeadline.setText(it.deadline?.let { date ->
-                SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()).format(date)
-            })
-        }
-
-        // Setup deadline picker
-        dialogBinding.editTextDeadline.setOnClickListener {
-            showDateTimePicker { date ->
-                selectedDate = date
-                dialogBinding.editTextDeadline.setText(
-                    SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()).format(date)
-                )
-            }
-        }
-
-        AlertDialog.Builder(this)
-            .setTitle(if (todo == null) "Add New Task" else "Edit Task")
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Add New Task")
             .setView(dialogBinding.root)
-            .setPositiveButton(if (todo == null) "Add" else "Save") { _, _ ->
+            .setPositiveButton("Add") { _, _ ->
                 val title = dialogBinding.editTextTitle.text.toString()
                 val description = dialogBinding.editTextDescription.text.toString()
-                
                 if (title.isNotBlank()) {
-                    if (todo == null) {
-                        viewModel.insertTodo(title, description, selectedDate)
-                        showSnackbar("Task added")
-                    } else {
-                        viewModel.updateTodo(todo.copy(
-                            title = title,
-                            description = description,
-                            deadline = selectedDate
-                        ))
-                        showSnackbar("Task updated")
-                    }
+                    viewModel.insertTodo(title, description, selectedDateTime)
+                    showSnackbar("Task added")
+                } else {
+                    Toast.makeText(this, "Title cannot be empty", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Cancel", null)
-            .show()
+            .create()
+
+        dialogBinding.buttonSetDeadline.setOnClickListener {
+            showDateTimePicker { dateTime ->
+                selectedDateTime = dateTime
+                dialogBinding.textDeadline.text = dateTime.format(dateFormatter)
+            }
+        }
+
+        dialog.show()
     }
 
-    private fun showDateTimePicker(onDateTimeSelected: (Date) -> Unit) {
+    private fun showEditTaskDialog(todo: Todo) {
+        val dialogBinding = DialogTaskBinding.inflate(layoutInflater)
+        selectedDateTime = todo.deadline
+
+        dialogBinding.apply {
+            editTextTitle.setText(todo.title)
+            editTextDescription.setText(todo.description)
+            textDeadline.text = todo.deadline?.format(dateFormatter) ?: "No deadline"
+        }
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Edit Task")
+            .setView(dialogBinding.root)
+            .setPositiveButton("Save") { _, _ ->
+                val title = dialogBinding.editTextTitle.text.toString()
+                val description = dialogBinding.editTextDescription.text.toString()
+                if (title.isNotBlank()) {
+                    viewModel.updateTodo(todo.copy(
+                        title = title,
+                        description = description,
+                        deadline = selectedDateTime
+                    ))
+                    showSnackbar("Task updated")
+                } else {
+                    Toast.makeText(this, "Title cannot be empty", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialogBinding.buttonSetDeadline.setOnClickListener {
+            showDateTimePicker { dateTime ->
+                selectedDateTime = dateTime
+                dialogBinding.textDeadline.text = dateTime.format(dateFormatter)
+            }
+        }
+
+        dialog.show()
+    }
+
+    private fun showDateTimePicker(onDateTimeSelected: (LocalDateTime) -> Unit) {
         val calendar = Calendar.getInstance()
         
         DatePickerDialog(
@@ -156,8 +174,8 @@ class MainActivity : AppCompatActivity() {
                 TimePickerDialog(
                     this,
                     { _, hour, minute ->
-                        calendar.set(year, month, day, hour, minute)
-                        onDateTimeSelected(calendar.time)
+                        val dateTime = LocalDateTime.of(year, month + 1, day, hour, minute)
+                        onDateTimeSelected(dateTime)
                     },
                     calendar.get(Calendar.HOUR_OF_DAY),
                     calendar.get(Calendar.MINUTE),

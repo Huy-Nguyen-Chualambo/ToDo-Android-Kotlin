@@ -11,7 +11,7 @@ import com.example.todoapp.data.TodoFilter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import java.util.Date
+import java.time.LocalDateTime
 
 class TodoViewModel(application: Application): AndroidViewModel(application) {
     private val dao = TodoDatabase.getDatabase(application).todoDao()
@@ -40,17 +40,17 @@ class TodoViewModel(application: Application): AndroidViewModel(application) {
         }.sortedWith(
             when (sortOrder) {
                 SortOrder.CREATED_AT -> compareByDescending { it.createdAt }
-                SortOrder.DEADLINE -> compareBy { it.deadline ?: Date(Long.MAX_VALUE) }
+                SortOrder.DEADLINE -> compareBy { it.deadline ?: LocalDateTime.MAX }
             }
         )
     }.asLiveData()
 
-    fun insertTodo(title: String, description: String = "", deadline: Date? = null) = viewModelScope.launch {
+    fun insertTodo(title: String, description: String = "", deadline: LocalDateTime? = null) = viewModelScope.launch {
         dao.insert(Todo(
             title = title,
             description = description,
             deadline = deadline,
-            createdAt = Date()
+            createdAt = LocalDateTime.now()
         ))
     }
 

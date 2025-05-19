@@ -2,7 +2,7 @@ package com.example.todoapp.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.util.Date
+import java.time.LocalDateTime
 
 @Entity(tableName = "todos")
 data class Todo(
@@ -10,6 +10,6 @@ data class Todo(
     val title: String,
     val description: String = "",
     val isDone: Boolean = false,
-    val deadline: Date? = null,
-    val createdAt: Date = Date()
+    val deadline: LocalDateTime? = null,
+    val createdAt: LocalDateTime = LocalDateTime.now()
 )
