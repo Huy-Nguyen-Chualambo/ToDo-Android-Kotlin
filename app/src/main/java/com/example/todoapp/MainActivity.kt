@@ -72,8 +72,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupFilterChips() {
-        binding.filterChipGroup.setOnCheckedChangeListener { group, checkedId ->
-            val filter = when (checkedId) {
+        binding.filterChipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
+            val filter = when (checkedIds.firstOrNull()) {
                 binding.chipAll.id -> TodoFilter.ALL
                 binding.chipActive.id -> TodoFilter.ACTIVE
                 binding.chipCompleted.id -> TodoFilter.COMPLETED
